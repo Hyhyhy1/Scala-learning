@@ -5,21 +5,19 @@ import chapter3.ArraySwitch
 import chapter3.TaskFive
 import chapter4.TaskOne
 import chapter4.PropertiesTask
+import chapter5.BankAccount
 
 
 object Main extends App {
 
   /*testSignum()
-  $testFor()
-  $testCountdown()
-  $testArraySwitch()
-  $testGetAvg()
-  PropertiesTask.printProperties() */
-  
+  testFor()
+  testCountdown()
+  testArraySwitch()
+  testGetAvg()
+  PropertiesTask.printProperties()
+  testBankAccount()*/
 
-  val temp = TaskOne.getSales(0.3)
-
-  println(temp)
   
 
 
@@ -74,6 +72,55 @@ def testGetAvg() = {
   println(s"getAvg(Array(-10, 0, 10)) = $avg5")
   assert(avg5 == 0.0, "Среднее должно быть 0.0")
 
+}
+
+def testBankAccount() = {
+  // 1. Проверка начального баланса
+  val account1 = new BankAccount()
+  assert(account1.balance == 0, "Начальный баланс должен быть 0")
+  println(s"Начальный баланс: ${account1.balance}")
+
+  // 2. Проверка начисления (deposit)
+  account1.deposit(100)
+  assert(account1.balance == 100, "После deposit(100) баланс должен быть 100")
+  println(s"После deposit(100): ${account1.balance}")
+
+  account1.deposit(50)
+  assert(account1.balance == 150, "После deposit(50) баланс должен быть 150")
+  println(s"После deposit(50): ${account1.balance}")
+
+  // 3. Проверка списания (withdraw)
+  account1.withdraw(30)
+  assert(account1.balance == 120, "После withdraw(30) баланс должен быть 120")
+  println(s"После withdraw(30): ${account1.balance}")
+
+  account1.withdraw(120)
+  assert(account1.balance == 0, "После withdraw(120) баланс должен быть 0")
+  println(s"После withdraw(120): ${account1.balance}")
+
+  // 4. Проверка разных экземпляров
+  val account2 = new BankAccount()
+  val account3 = new BankAccount()
+
+  account2.deposit(500)
+  account3.deposit(1000)
+
+  assert(account2.balance == 500, "account2.balance должен быть 500")
+  assert(account3.balance == 1000, "account3.balance должен быть 1000")
+  assert(account2.balance != account3.balance, "Балансы разных аккаунтов не должны совпадать")
+  println(s"account2.balance = ${account2.balance}, account3.balance = ${account3.balance}")
+
+  // Изменение одного не должно влиять на другой
+  account2.withdraw(200)
+  assert(account2.balance == 300, "account2.balance должен быть 300")
+  assert(account3.balance == 1000, "account3.balance должен остаться 1000")
+  println(s"После изменения account2: account2=${account2.balance}, account3=${account3.balance}")
+
+  val account4 = new BankAccount(1000)
+  assert(account4.balance == 1000, "Начальный баланс через конструктор должен быть 1000")
+  println(s"Начальный баланс через конструктор: ${account4.balance}")
+
+  println("Все тесты BankAccount прошли!")
 }
 
 }
