@@ -1,4 +1,7 @@
 import scala.math.sqrt
+import scala.io.Source
+import java.io.PrintWriter
+import java.awt.geom.Ellipse2D
 import chapter2.Signum
 import chapter2.Countdown
 import chapter3.ArraySwitch
@@ -7,6 +10,8 @@ import chapter4.TaskOne
 import chapter4.PropertiesTask
 import chapter5.BankAccount
 import chapter8.{BankAccount2, CheckingAccount}
+import chapter9.{fileReader, tabReplacer}
+import chapter10.{RectangleLike, OrderedPoint}
 
 
 object Main extends App {
@@ -17,10 +22,14 @@ object Main extends App {
   testArraySwitch()
   testGetAvg()
   PropertiesTask.printProperties()
-  testBankAccount()*/
+  testBankAccount()
   testBankAccount2
   testCheckingAccount
   testInstanceIsolation
+  testFileReader
+  testTabReplacer
+  testRectangleLike*/
+  testOrderedPoint
 
   
 
@@ -226,4 +235,120 @@ object Main extends App {
     println(s"После изменения check1: check1=${check1.currentBalance}, check2=${check2.currentBalance}")
   }
 
+  def testFileReader() = {
+    val inputPath = "src/main/scala/chapter9/fileOne.txt"
+    val outputPath = "src/main/scala/chapter9/fileOneReversed.txt"
+
+    fileReader.createReversedFile(inputPath, outputPath)
+  }
+
+  def testTabReplacer(): Unit = {
+    println("=== Тест tabReplacer ===")
+    
+    val inputPath = "src/main/scala/chapter9/testTabsIn.txt"
+    val outputPath = "src/main/scala/chapter9/testTabsOut.txt"
+    val tabSize = 4
+    
+    val writer = new PrintWriter(inputPath, "UTF-8")
+    try {
+      writer.println("Name\tAge\tCity")
+      writer.println("Alice\t30\tMoscow")
+      writer.println("Bob\t25\tSaint Petersburg")
+      writer.println("Christopher\t35\tNew York")
+      writer.println("Di\tXi'an")
+    } finally {
+      writer.close()
+    }
+    println(s"Создан исходный файл: $inputPath")
+    
+    tabReplacer.replaceTabs(inputPath, outputPath, tabSize)
+    println(s"Файл обработан, результат в: $outputPath")
+    
+    val source = Source.fromFile(outputPath, "UTF-8")
+    val resultLines = try {
+      source.getLines.toList
+    } finally {
+      source.close()
+    }
+    
+    val expectedLines = List(
+      "Name    Age City",
+      "Alice   30  Moscow",
+      "Bob 25  Saint Petersburg",
+      "Christopher 35  New York",
+      "Di  Xi'an"
+    )
+    
+    assert(resultLines == expectedLines, 
+      s"Результат не совпадает с ожидаемым!\nОжидалось:\n${expectedLines.mkString("\n")}\nПолучено:\n${resultLines.mkString("\n")}")
+    
+    println("Табуляции заменены на пробелы с правильным выравниванием!")
+    println("Тест tabReplacer прошёл успешно!\n")
+  }
+
+  def testRectangleLike(): Unit = {
+    println("=== Тест RectangleLike ===")
+
+    // 1. Тест начальных значений
+    val egg1 = new Ellipse2D.Double(5, 10, 20, 30) with RectangleLike
+    assert(egg1.getX == 5, s"Начальный X должен быть 5, а не ${egg1.getX}")
+    assert(egg1.getY == 10, s"Начальный Y должен быть 10, а не ${egg1.getY}")
+    assert(egg1.getWidth == 20, s"Начальная ширина должна быть 20, а не ${egg1.getWidth}")
+    assert(egg1.getHeight == 30, s"Начальная высота должна быть 30, а не ${egg1.getHeight}")
+    println("[PASS] Начальные значения корректны")
+
+    // 2. Тест метода translate (положительный сдвиг)
+    val egg2 = new Ellipse2D.Double(5, 10, 20, 30) with RectangleLike
+    egg2.translate(10, 10)
+    assert(egg2.getX == 15, s"После translate(10,10) X должен быть 15, а не ${egg2.getX}")
+    assert(egg2.getY == 20, s"После translate(10,10) Y должен быть 20, а не ${egg2.getY}")
+    assert(egg2.getWidth == 20, "Ширина не должна измениться после translate")
+    assert(egg2.getHeight == 30, "Высота не должна измениться после translate")
+    println("[PASS] Метод translate(10, 10) работает корректно")
+
+    // 3. Тест метода grow (расширение во все стороны)
+    val egg3 = new Ellipse2D.Double(5, 10, 20, 30) with RectangleLike
+    egg3.grow(10, 20)
+    assert(egg3.getX == -5, s"После grow(10,20) X должен быть -5, а не ${egg3.getX}")
+    assert(egg3.getY == -10, s"После grow(10,20) Y должен быть -10, а не ${egg3.getY}")
+    assert(egg3.getWidth == 40, s"После grow(10,20) ширина должна быть 40, а не ${egg3.getWidth}")
+    assert(egg3.getHeight == 70, s"После grow(10,20) высота должна быть 70, а не ${egg3.getHeight}")
+    println("[PASS] Метод grow(10, 20) работает корректно")
+
+    // 4. Тест метода translate (отрицательный сдвиг)
+    val egg4 = new Ellipse2D.Double(5, 10, 20, 30) with RectangleLike
+    egg4.translate(-5, -10)
+    assert(egg4.getX == 0, s"После translate(-5,-10) X должен быть 0, а не ${egg4.getX}")
+    assert(egg4.getY == 0, s"После translate(-5,-10) Y должен быть 0, а не ${egg4.getY}")
+    println("[PASS] Метод translate(-5, -10) работает корректно")
+
+    println("Все тесты RectangleLike прошли успешно.\n")
+  }
+
+  def testOrderedPoint(): Unit = {
+    println("=== Тест OrderedPoint ===")
+    
+    val points = List(
+      new OrderedPoint(2, 5),
+      new OrderedPoint(1, 10),
+      new OrderedPoint(2, 1),
+      new OrderedPoint(1, 2)
+    )
+    println("Точки")
+    println(points.toString())
+
+    val sorted = points.sorted
+    
+    println("Отсортированные точки:")
+    sorted.foreach(p => println(s"(${p.getX}, ${p.getY})"))
+    
+    assert(sorted.head.getX == 1 && sorted.head.getY == 2)
+    assert(sorted.last.getX == 2 && sorted.last.getY == 5)
+    
+    println("Тест OrderedPoint прошёл успешно!\n")
+  }
 }
+
+
+
+
